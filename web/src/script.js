@@ -81,9 +81,48 @@ if (typeof io === 'undefined') {
         title: "로그 기록 정지",
         text: "별도 로그 기록이 정지되었습니다."
       });
+      
     }
   });
   
+  //여기부터 엑셀 추가함
+  
+// 1) 녹화 시작 버튼
+$('#start-excel-recording').on('click', () => {
+  socket.emit('start_recording', { intervalSec: 0.1 });   // 예: 1초 간격
+  $('#start-excel-recording').prop('disabled', true);
+  $('#stop-excel-recording').prop('disabled', false);
+  $('#excel-download').empty();
+});
+
+// 2) 녹화 중지 버튼
+$('#stop-excel-recording').on('click', () => {
+  socket.emit('stop_recording');
+  $('#stop-excel-recording').prop('disabled', true);
+});
+
+// 3) 서버로부터 “녹화 시작됨” 확인
+socket.on('recording_started', () => {
+  Swal.fire({ icon: 'success', title: '엑셀 기록 시작', timer: 1000 });
+});
+
+// 4) 서버로부터 “녹화 중지·파일 생성됨” 알림
+socket.on('recording_stopped', ({ file }) => {
+  // file 은 e.g. "/recorded/recording-<id>-<timestamp>.xlsx"
+  const link = $(`<a href="${file}" download>📥 엑셀 파일 다운로드</a>`);
+  $('#excel-download').empty().append(link);
+  $('#start-excel-recording').prop('disabled', false);
+  Swal.fire({ icon: 'success', title: '엑셀 파일 생성 완료' });
+});
+
+// 5) 에러 처리
+socket.on('error', msg => {
+  Swal.fire({ icon: 'error', title: '오류', text: msg });
+});
+
+//여기까지  
+
+
 
   // on data report update
   socket.on('report', data => {
@@ -172,64 +211,142 @@ window.onload = function() {
   drawSpeedometer(0);
 };
 
-function drawSpeedometer(speed) {
-  const canvas = document.getElementById('speedometer');
-  if (!canvas) {
-    return;
-  }
+function drawAcceleration() {
+  const canvas = document.getElementById('accelCanvas');
+  if (!canvas) return;
+
   const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    return;
+  if (!ctx) return;
+
+  const width = canvas.width;
+  const height = canvas.height;
+
+  ctx.clearRect(0, 0, width, height);
+
+  // 최대 g 범위 설정 (±5g)
+  const maxG = 2.5;
+
+  // 캔버스 절반 크기 기준으로 스케일 자동 계산
+  const scaleX = (width / 2) / maxG;
+  const scaleY = (height / 2) / maxG;
+
+  // 격자선 그리기
+  ctx.strokeStyle = '#444';  // 격자선 색
+  ctx.lineWidth = 0.5;
+
+  // 수직 격자선 (x축 기준)
+  for (let i = -maxG; i <= maxG; i++) {
+    const x = width / 2 + i * scaleX;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
   }
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-  const radius = canvas.width / 2 - 10;
 
+  // 수평 격자선 (y축 기준)
+  for (let i = -maxG; i <= maxG; i++) {
+    const y = height / 2 - i * scaleY;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 배경 색상
-  ctx.fillStyle = '#FFFFFF';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // 바깥 원의 반달
+  //  축 그리기 (굵게)
+  ctx.strokeStyle = 'gray';
+  ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI, false);
-  ctx.lineWidth = 10;
-  ctx.strokeStyle = '#000000';
+  ctx.moveTo(0, height / 2);
+  ctx.lineTo(width, height / 2);
+  ctx.moveTo(width / 2, 0);
+  ctx.lineTo(width / 2, height);
   ctx.stroke();
   ctx.closePath();
 
-  // 눈금
-  for (let i = 0; i <= 100; i += 10) {
-    const angle = (i * 1.8 - 180) * Math.PI / 180;
+  // 가속도 값 가져오기
+  const ax = parseFloat(document.getElementById('accel2-x').innerText) || 0;
+  const ay = parseFloat(document.getElementById('accel2-y').innerText) || 0;
+
+  // 점 위치 계산
+  const dotX = width / 2 + ax * scaleX;
+  const dotY = height / 2 - ay * scaleY;
+
+  // 점 그리기
+  ctx.fillStyle = 'red';
+  ctx.beginPath();
+  ctx.arc(dotX, dotY, 5, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.closePath();
+
+  // 텍스트 표시
+  ctx.font = '16px Arial';
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'center';
+  ctx.fillText(`(${ax.toFixed(2)}, ${ay.toFixed(2)})`, dotX, dotY - 15);
+
+  requestAnimationFrame(drawAcceleration);
+}
+
+
+// 초기 실행
+drawAcceleration();
+
+
+function drawSpeedometer(speed) {
+  const canvas = document.getElementById('speedometer');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const centerX = canvas.width / 2;
+  const radius = canvas.width / 2 - 10;
+  const centerY = canvas.height; 
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 반원 테두리
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, Math.PI, 2 * Math.PI); // 반원
+  ctx.lineWidth = 20;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.stroke();
+  ctx.closePath();
+
+  // 눈금과 숫자 (0~120)
+  ctx.font = '14px Arial';
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  for (let i = 0; i <= 120; i += 10) {
+    const angle = (i / 120) * Math.PI + Math.PI; // 180도 ~ 360도
     const x1 = centerX + (radius - 10) * Math.cos(angle);
     const y1 = centerY + (radius - 10) * Math.sin(angle);
     const x2 = centerX + radius * Math.cos(angle);
     const y2 = centerY + radius * Math.sin(angle);
 
+    // 눈금 선
     ctx.beginPath();
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.lineWidth = 2;
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = 'white';
     ctx.stroke();
     ctx.closePath();
 
-    // 눈금 숫자
+    // 숫자
     const textX = centerX + (radius - 30) * Math.cos(angle);
     const textY = centerY + (radius - 30) * Math.sin(angle);
-    ctx.font = '12px Arial';
-    ctx.fillStyle = '#000000';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
     ctx.fillText(i, textX, textY);
   }
 
-  // 속도계 핀
-  const speedAngle = (speed * 1.8 - 180) * Math.PI / 180;
-  const pinX = centerX + (radius - 40) * Math.cos(speedAngle); // 핀 길이 줄이기
-  const pinY = centerY + (radius - 40) * Math.sin(speedAngle); // 핀 길이 줄이기
+  // 속도 제한 (최대 120)
+  const clampedSpeed = Math.min(speed, 120);
+  const speedAngle = (clampedSpeed / 120) * Math.PI + Math.PI;
+
+  // 핀
+  const pinX = centerX + (radius - 40) * Math.cos(speedAngle);
+  const pinY = centerY + (radius - 40) * Math.sin(speedAngle);
 
   ctx.beginPath();
   ctx.moveTo(centerX, centerY);
@@ -238,8 +355,36 @@ function drawSpeedometer(speed) {
   ctx.strokeStyle = '#FF0000';
   ctx.stroke();
   ctx.closePath();
-}
 
+  // 게이지 바
+  const startAngle = Math.PI;
+  const endAngle = speedAngle;
+  
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius , startAngle, endAngle, false);
+  ctx.lineWidth = 12;
+  ctx.strokeStyle = 'rgba(169, 223, 216, 0.4)';
+  ctx.stroke();
+  ctx.closePath();
+
+  //ctx.beginPath();
+  //ctx.arc(centerX, centerY, radius - 30, startAngle, endAngle, false);
+  //ctx.lineWidth = 10;
+  //ctx.strokeStyle = '#A9DFD8';
+  //ctx.stroke();
+  //ctx.closePath();
+
+  // 속도 숫자 표시
+  ctx.font = 'bold 48px Arial';
+  ctx.fillStyle = 'white';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(clampedSpeed.toFixed(0), centerX, centerY - 20);
+  
+  ctx.font = '20px Arial';
+  ctx.textAlign = 'left';  
+  ctx.fillText('km/h', centerX + 30, centerY - 20);
+}
 function process_status(status) {
   console.log("Received status:", status);
   $("#telemetry i").css("color", status.telemetry ? "green" : "red");
@@ -290,11 +435,25 @@ function process_status(status) {
   $("#precharge i").css("color", status.inverter.state.relay.precharge ? "green" : "red");
   $("#air i").css("color", status.inverter.state.relay.main ? "green" : "red");
 
-  $("#accel-value").text(status.car.accel);
-  $("#brake-value").text(status.car.brake);
+  $("#accel-value").text(parseFloat(status.car.accel).toFixed(1));
+  $("#brake-value").text(parseFloat(status.car.brake).toFixed(1));
 
-  $("#steering-speed").text(status.car.steering.speed);
-  $("#steering-angle").text(status.car.steering.angle);
+  $("#steering-speed").text(parseFloat(status.car.steering.speed).toFixed(1));
+  $("#steering-angle").text(parseFloat(status.car.steering.angle).toFixed(1));
+  
+  $("#linear-front-right").text(parseFloat(status.car.linear.front_right).toFixed(1));
+  $("#linear-front-left").text(parseFloat(status.car.linear.front_left).toFixed(1));
+  $("#linear-rear-right").text(parseFloat(status.car.linear.rear_right).toFixed(1));
+  $("#linear-rear-left").text(parseFloat(status.car.linear.rear_left).toFixed(1));
+  
+   //가속도
+  $("#accel2-x").text(parseFloat(status.car.accel2.accel2_x).toFixed(1));
+  $("#accel2-y").text(parseFloat(status.car.accel2.accel2_y).toFixed(1));
+  $("#accel2-z").text(parseFloat(status.car.accel2.accel2_z).toFixed(1));
+//타이어온도
+  $("#fronttie-temp").text(parseFloat(status.car.temp.front_tie).toFixed(1));
+  $("#reartie-temp").text(parseFloat(status.car.temp.rear_tie).toFixed(1));
+
 }
 
 // GPS
@@ -337,7 +496,17 @@ const graph_config = {
   'graph-motor-igbt-temperature': { delay: 0, grace: 5, color: 'rgb(54, 162, 235)' },
   'graph-inverter-temperature': { delay: 0, grace: 5, color: 'rgb(54, 162, 235)' },
   'graph-steering-wheel-angle': { delay: 0, grace: 5, color: 'rgb(75, 192, 192)' }, // 추가
-  'graph-steering-wheel-speed': { delay: 0, grace: 5, color: 'rgb(153, 102, 255)' } // 추가
+  'graph-steering-wheel-speed': { delay: 0, grace: 5, color: 'rgb(153, 102, 255)' }, // 추가
+  'graph-linear-front-left': { delay: 0, grace: 5, color: 'rgb(255, 159, 64)' },
+  'graph-linear-front-right': { delay: 0, grace: 5, color: 'rgb(255, 205, 86)' },
+  'graph-linear-rear-left': { delay: 0, grace: 5, color: 'rgb(75, 192, 192)' },
+  'graph-linear-rear-right': { delay: 0, grace: 5, color: 'rgb(153, 102, 255)' },
+  'graph-tire-temp-rear': { delay: 0, grace: 5, color: 'rgb(255, 159, 64)' },
+'graph-tire-temp-front': { delay: 0, grace: 5, color: 'rgb(255, 205, 86)' },
+'graph-accel-x': { delay: 0, grace: 5, color: 'rgb(75, 192, 192)' },
+'graph-accel-y': { delay: 0, grace: 5, color: 'rgb(153, 102, 255)' },
+'graph-accel-z': { delay: 0, grace: 5, color: 'rgb(255, 159, 64)' },
+
 };
 
 // realtime graph updater
@@ -434,6 +603,64 @@ function process_data(data) {
             y: data.parsed.speed
           });
           break;
+          case "CAN_FRONT_LINER_L":
+  graph_data['graph-linear-front-left'].push({
+    x: data.datetime,
+    y: data.parsed.lengthMM
+  });
+  break;
+
+case "CAN_FRONT_LINER_R":
+  graph_data['graph-linear-front-right'].push({
+    x: data.datetime,
+    y: data.parsed.lengthMM
+  });
+  break;
+
+case "CAN_REAR_LINER_L":
+  graph_data['graph-linear-rear-left'].push({
+    x: data.datetime,
+    y: data.parsed.lengthMM
+  });
+  break;
+
+case "CAN_REAR_LINER_R":
+  graph_data['graph-linear-rear-right'].push({
+    x: data.datetime,
+    y: data.parsed.lengthMM
+  });
+  break;
+  
+   case "CAN_FRONTTIE_TEMP":
+  graph_data['graph-tire-temp-front'].push({
+    x: data.datetime,
+    y: data.parsed.lengthMM
+  });
+  break;
+
+case "CAN_REARTIE_TEMP":
+  graph_data['graph-tire-temp-rear'].push({
+    x: data.datetime,
+    y: data.parsed.lengthMM
+  });
+ 
+  break;
+
+case "CAN_ACCEL":
+  graph_data['graph-accel-x'].push({
+    x: data.datetime,
+    y: data.parsed.accel2_x
+  });
+  graph_data['graph-accel-y'].push({
+    x: data.datetime,
+    y: data.parsed.accel2_y
+  });
+  graph_data['graph-accel-z'].push({
+    x: data.datetime,
+    y: data.parsed.accel2_z
+  });
+  break;
+          
       }
       break;
     }
@@ -632,6 +859,9 @@ let tooltips = {
   'input-power-failsafe': { title: 'Input Power Supply Failsafe', desc: '<div class="failsafe-desc">BMS에 공급되는 12V 전원의 실제 전압이 너무 낮아 정상 작동을 보장할 수 없을 때 발생하는 비상 모드입니다. 공급 전원이 8초 이상 8V 이하로 유지될 때 발생합니다.<br><br>이 모드에서 charge enable, discharge enable, charger safety 출력은 모두 비활성화됩니다. 또한 모든 디지털 출력은 꺼지며, 충방전 전류 제한은 즉시 0A로 설정됩니다. 5V 아날로그 출력은 동작할 수 있으나 측정값은 신뢰할 수 없습니다.<br><br>이 문제로 인한 에러 코드는 기록에 남지만, 정상 전압이 복구되면 BMS는 즉시 다시 정상 작동합니다.<br><br>한편, BMS는 5초 미만의 시간 동안 발생하는 전압 강하로 전압이 4.5V까지 내려가더라도 이 비상 모드를 활성화하지 않고 정상 작동할 수 있습니다.</div>' },
   'steering-angle': { title: 'Steering Wheel Angle', desc: '운전자가 스티어링 휠을 회전시킨 정도를 의미합니다.<br><br>이 각도는 스티어링 휠이 중립 위치(직진 위치)에서 얼마나 많이 회전했는지를 나타내며, 차량의 방향을 결정하는 중요한 요소입니다'},
   'steering-speed': { title: 'Steering Wheel Speed', desc: '운전자가 스티어링 휠을 회전시키는 속도를 의미합니다.<br><br>이는 스티어링 휠이 단위 시간당 회전하는 각도를 나타내며,일반적으로 도/초(degrees per second) 단위로 측정됩니다.<br>스티어링 휠의 속도는 차량의 방향을 얼마나 빠르게 변경하는지를 나타내며, 빠른 조향 속도는 급격한 방향 전환을, 느린 조향 속도는 완만한 방향 전환을 의미합니다<br>'},
+   'linear-position': { title: 'Linear Sensor Position',desc: '선형 센서는 물체의 직선 운동을 측정하는 센서입니다.<br><br>' +'이 값은 센서가 기준 위치(예: 0mm)에서 얼마나 이동했는지를 나타내며,물리적 거리 변화 측정에 사용됩니다.'},
+   'tie-temp': { title: '타이어 온도',desc: '타이어 온도 상태입니다.'},
+  'accel': { title: '가속도',desc: '측정한 가속도 센서 값입니다. x,y,z 값을 보여줍니다.'},
 };
 
 function fault_toHTML(faults) {

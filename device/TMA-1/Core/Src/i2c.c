@@ -124,12 +124,18 @@ int TELEMETRY_SETUP(void) {
 
 
 void TELEMETRY_TRANSMIT_LOG(void) {
-  if (telemetry_flag & (1 << TELEMETRY_BUFFER_REMAIN) && !(telemetry_flag & (1 << TELEMETRY_BUFFER_TRANSMIT))) {
+  if (telemetry_flag & (1 << TELEMETRY_BUFFER_REMAIN) &&
+      !(telemetry_flag & (1 << TELEMETRY_BUFFER_TRANSMIT))) {
+    
     static uint8_t payload[sizeof(LOG)];
     ring_buffer_dequeue_arr(&TELEMETRY_BUFFER, (char *)payload, sizeof(LOG));
-    int ret = HAL_I2C_Master_Transmit_IT(I2C_TELEMETRY, ESP_I2C_ADDR, payload, sizeof(LOG));
 
-    if (ret == HAL_OK) {
+    // ESP1로 전송(디스플레이)
+    int ret1 = HAL_I2C_Master_Transmit_IT(I2C_TELEMETRY, ESP1_I2C_ADDR, payload, sizeof(LOG));
+    // ESP2로 전송(서버전송용)
+    int ret2 = HAL_I2C_Master_Transmit_IT(I2C_TELEMETRY, ESP2_I2C_ADDR, payload, sizeof(LOG));
+
+    if (ret1 == HAL_OK && ret2 == HAL_OK) {
       telemetry_flag |= 1 << TELEMETRY_BUFFER_TRANSMIT;
     } else {
       ring_buffer_queue_arr(&TELEMETRY_BUFFER, (char *)payload, sizeof(LOG));

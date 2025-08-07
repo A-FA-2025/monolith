@@ -31,6 +31,21 @@ const LOG_KEY = {
 
     0x81: "CAN_BMS_CORE",
     0x82: "CAN_BMS_TEMP",
+    
+    //linear_sensor
+    0x83: "CAN_FRONT_LINEAR_L",
+    0x84: "CAN_FRONT_LINEAR_R",
+    0x85: "CAN_REAR_LINEAR_L",
+    0x86: "CAN_REAR_LINEAR_R",
+    
+    //temp_sensor
+    0x87: "CAN_FRONTTIE_TEMP",
+    0x88: "CAN_REARTIE_TEMP",
+    
+    //accel_sensor
+    0x89: "CAN_ACCEL",
+    
+    
     // 0x2B0: "CAN_STEERING_WHEEL_ANGLE"
   },
   "ADC": [ "ADC_INIT", "ADC_CPU", "ADC_DIST" ,"ADC_A3"],
@@ -379,12 +394,89 @@ function parse(log) {
             speed: signed(raw[2] + raw[3] * Math.pow(2, 8), 16) * 4 // 0 to 1,016°/s 범위
           };
           break;
+    }
+           case "CAN_FRONT_LINEAR_L": {
+          const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24);
+          const buffer = new ArrayBuffer(4);
+          const view = new DataView(buffer);
+          view.setUint32(0, bits, true);
+          parsed = {
+            lengthMM: view.getFloat32(0, true),
+          };
+          break;
+        } 
+       
+        case "CAN_FRONT_LINEAR_R": {
+         const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24);
+          const buffer = new ArrayBuffer(4);
+          const view = new DataView(buffer);
+          view.setUint32(0, bits, true);
+          parsed = {
+            lengthMM: view.getFloat32(0, true),
+          };
+          break;
+        } 
+       
+        case "CAN_REAR_LINEAR_L": {
+          const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24);
+          const buffer = new ArrayBuffer(4);
+          const view = new DataView(buffer);
+          view.setUint32(0, bits, true);
+          parsed = {
+            lengthMM: view.getFloat32(0, true),
+          };
+          break;
+        } 
+       
+        case "CAN_REAR_LINEAR_R": {
+          const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24);
+          const buffer = new ArrayBuffer(4);
+          const view = new DataView(buffer);
+          view.setUint32(0, bits, true);
+          parsed = {
+            lengthMM: view.getFloat32(0, true),
+          };
+          break;
+        } 
+    
+        case "CAN_FRONTTIE_TEMP": {
+          const rawADCc = raw[0] + raw[1] * Math.pow(2, 8);
+          const voltagee = (rawADCc / 4095.0) * 3.3;
+          const calibratedVoltagee = voltagee * 1.12 + 0.05;
+          const temperatureC = 101.65 * calibratedVoltagee - 68.25 - 8;
+          parsed = {
+            temperature: temperatureC
+          };
+          break;
+        } 
+        
+        case "CAN_REARTIE_TEMP": {
+          const rawADCc = raw[0] + raw[1] * Math.pow(2, 8);
+          const voltagee = (rawADCc / 4095.0) * 3.3;
+          const calibratedVoltagee = voltagee * 1.12 + 0.05;
+          const temperatureC = 101.65 * calibratedVoltagee - 68.25 - 8;
+          parsed = {
+            temperature: temperatureC
+          };
+          break;
         }
         
-
-        default: {
-          parsed = null;
+        case "CAN_ACCEL": {
+        parsed = {
+            accel2_x: signed(raw[0] + raw[1] * Math.pow(2, 8), 16) / 128, 
+            accel2_y: signed(raw[2] + raw[3] * Math.pow(2, 8), 16) / 128, 
+            accel2_z: signed(raw[2] + raw[3] * Math.pow(2, 8), 16) / 128 
+          };
           break;
+        }
+        
+        
+        
+    
+        
+        default: {
+        parsed = null;
+        break;
         }
       }
       break;
@@ -452,25 +544,7 @@ function parse(log) {
     } // case 'ADC'
     case 'TIM':
       break;
-    case 'ACC': {
-      switch (key) {
-        case "ACC_INIT":
-          break;
-        case 'ACC_DATA': {
-          parsed = {
-            x: 4 / 512 * signed(raw[0] + raw[1] * Math.pow(2, 8), 16),
-            y: 4 / 512 * signed(raw[2] + raw[3] * Math.pow(2, 8), 16),
-            z: 4 / 512 * signed(raw[4] + raw[5] * Math.pow(2, 8), 16),
-          };
-          break;
-        }
 
-        default:
-          parsed = null;
-          break;
-      }
-      break;
-    } // case 'ACC'
     case 'LCD': 
       break;
     case 'GPS': {

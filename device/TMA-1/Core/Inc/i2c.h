@@ -42,7 +42,8 @@ extern I2C_HandleTypeDef hi2c1;
 extern I2C_HandleTypeDef hi2c3;
 
 /* USER CODE BEGIN Private defines */
-#define ESP_I2C_ADDR (0x0) // broadcast through general call
+#define ESP1_I2C_ADDR (0x42) // To Display
+#define ESP2_I2C_ADDR (0x43) // To server sending ESP
 #define ACC_I2C_ADDR (0x53 << 1)
 /* USER CODE END Private defines */
 

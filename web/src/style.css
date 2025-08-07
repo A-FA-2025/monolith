@@ -18,9 +18,14 @@
   font-style: normal;
 }
 
-html {
+html, body {
+  height: 100%;
+  margin: 0;
   font-family: 'Nanum Gothic', sans-serif;
-  background-color: rgb(243, 244, 246);
+  background: linear-gradient(to bottom, rgba(51, 60, 85, 0.7), rgba(3, 4, 9, 0.9));
+  background-attachment: fixed; /* 중요: 스크롤 시 배경 고정 */
+  background-repeat: no-repeat;
+  background-size: cover;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -30,47 +35,40 @@ html {
 }
 
 body {
+  min-height: 100vh; /* 스크롤이 생길 때도 최소 100% 유지 */
   overflow-y: auto;
+  height: auto;
   border-radius: 10px;
 }
 
 #logo {
+  position: relative; /* 배경 배치 기준 */
   text-align: center;
   max-width: 414px;
   margin: auto;
 }
 
+#logo::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  
+  width: 80%; /* 이미지보다 살짝 큰 배경 */
+  padding-top: 80%; /* 정사각형 비율 유지 */
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05), transparent);
+  filter: blur(12px);
+  z-index: 0;
+}
+
 #logo img {
+  position: relative; /* 배경 위에 올라오도록 */
+  z-index: 1;
   width: 70%;
 }
-/* 기본 로그 기록 버튼 스타일 (두 배 크기, 녹색 계열) */
-#log-control button {
-  background: linear-gradient(145deg, #4CAF50, #43a047);
-  color: #fff;
-  border: none;
-  padding: 15px 30px !important;
-  font-size: 22px !important;
-  border-radius: 12px !important;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 8px 8px 16px rgba(0,0,0,0.1), -8px -8px 16px rgba(255,255,255,0.7);
-  transition: all 0.2s ease-in-out;
-}
 
-#log-control button:hover {
-  background: linear-gradient(145deg, #43a047, #388e3c);
-  box-shadow: 6px 6px 12px rgba(0,0,0,0.1), -6px -6px 12px rgba(255,255,255,0.7);
-}
-
-#log-control button:active {
-  transform: scale(0.98);
-  box-shadow: none;
-}
-
-/* 정지 버튼일 때 (토글된 상태, 빨간색 계열) */
-#log-control button.stop {
-  background: linear-gradient(145deg, #E53935, #D32F2F) !important;
-}
 
 div#container, div#header {
   padding: 1rem;
@@ -87,13 +85,86 @@ div#header {
   padding-bottom: 0rem;
   justify-content: space-between;
 }
-
 header {
   position: sticky;
   top: 0;
-  background-color: rgb(243, 244, 246);
-  padding: 1rem 0rem;
   z-index: 1000;
+  padding: 1rem 3rem;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  max-width: 414px;
+  margin: auto;
+  overflow: visible; /* ::before가 살짝 삐져나올 수 있으니 */
+  position: relative; 
+  color: white;
+}
+
+
+/* 그라데이션 테두리용 */
+header::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 20px;
+  padding: 1px; /* 테두리 두께 */
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.4));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.header-btn {
+  background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.header-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 기본 로그 기록 버튼 스타일 (두 배 크기, 녹색 계열) */
+#log-control button {
+  background: linear-gradient(135deg, #2e3440, #3b4252); /* 모던한 딥그레이 계열 */
+  color: #e0e0e0;
+  border: none;
+  padding: 14px 28px !important;
+  margin-bottom: 20px;
+  font-size: 18px !important;
+  border-radius: 14px !important;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.2), -6px -6px 12px rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease-in-out;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+#log-control button:hover {
+  background: linear-gradient(135deg, #434c5e, #4c566a);
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.05);
+}
+
+#log-control button:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+
+/* 정지 버튼일 때 (토글된 상태, 빨간색 계열) */
+#log-control button.stop {
+  background: linear-gradient(145deg, #E53935, #D32F2F) !important;
 }
 
 div.status {
@@ -110,12 +181,19 @@ div.status.right {
 }
 
 div.fault-indicator {
-  width: 100%;
+  width:98%;
   text-align: center;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-}
+  margin-top: 0.5rem;
+  margin-bottom: 0rem;
 
+  /* 배경 및 스타일 추가 */
+  background-color:  rgba(10, 14, 35, 0.867);
+  padding: 20px 3px;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+ 
+ 
+}
 div.status.middle {
   width: 23%;
 }
@@ -161,25 +239,67 @@ div.status div.text {
   color: rgb(25,35,41);
 }
 
-
 article {
+  position: relative;
   margin-top: 1.5rem;
   padding: 1rem;
-  background-color: white;
-  border-radius: 10px;
-  min-width: 320px;
+  border-radius: 20px;
+  min-width: 300px;
   width: 380px;
   max-width: 414px;
+
+  
+  background: linear-gradient(
+    to bottom,
+    rgba(6, 11, 40, 0.9),    /* #060B28, 90% 불투명 */
+    rgba(10, 14, 35, 0.5),   /* #0A0E23, 50% 불투명 */
+    rgba(10, 14, 35, 0.3)   /* #0A0E23, 69% 불투명 */
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  z-index: 0;
+  overflow: hidden;
 }
 
+
+
+
+
+article::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px; 
+  border-radius: 20px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(255,255,255,0));
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+ 
+
+
 article h1 {
-  font-size: 1.75rem;
-  margin: 0px;
-  color: rgb(59,130,246);
+  font-size: 1.7rem;
+  /* text-align: center; */
+  margin: 0;
+  padding: 0.75rem;
+  /* background-color: #c2c2c2;  */
+  color: rgb(255, 255, 255);
+  border-radius: 10px;
 }
 
 article h2 {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
+  color: rgb(255, 255, 255);
   margin: 0;
 }
 
@@ -290,17 +410,209 @@ ul {
 .param-graph {
   margin-top: -50px; /* 필요에 따라 값을 조정하여 공백을 줄임 */
   height: 10px; /* 캔버스 높이를 적절히 조정 */
+  margin-bottom: -120px;
 }
 
 .speedometer-container {
-  margin-bottom: -120px; /* 필요에 따라 값을 조정하여 아래 공백을 줄임 */
+  background-color: transparent; /* 배경 투명 처리 */
+  margin-bottom: 0;
+  padding-bottom: 0;
+  margin-right:13px;
+
 }
+.accel-container{
+margin-left:50px;}
 #speedometer {
   display: block;
   margin: auto;
   border: none;
   padding-bottom: 0; /* 캔버스 아래의 공백 제거 */
+  background-color: transparent; /* 배경 투명 처리 */
 }
 .param-data {
   margin-top: -30px; /* 필요에 따라 값을 조정하여 텍스트를 위로 끌어올림 */
 }
+
+
+/* 전체 레이아웃 */
+.layout {
+  display: flex;
+  
+}
+
+/* 사이드바 */
+.sidebar {
+  position: fixed;
+  top: 10px;
+  bottom:10px;
+  left: 10px;
+  width: 200px;
+  height: 100vh;
+  background-color:   rgba(5, 9, 31, 0.855);
+  color: white;
+  padding: 1rem;
+  z-index: 1000;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  backdrop-filter: blur(10px);
+  justify-content: space-between; /* 위 메뉴 + 아래 푸터 */
+  height: 95vh;
+}
+
+/* 로고 */
+.sidebar .logo {
+  width: 100%;
+  max-width: 160px;
+}
+
+/* 네비게이션 링크 */
+.sidebar .nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 1rem;
+}
+.sidebar .nav a span,
+.sidebar .nav span {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: background 0.2s;
+  display: inline-block;
+  cursor: pointer;
+}
+.sidebar .nav a:hover span,
+.sidebar .nav span:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 본문 콘텐츠 */
+.main-content {
+  margin-left: 200px; /* 사이드바 폭만큼 밀기 */
+  width: calc(100% - 200px); /* 전체에서 사이드바 폭을 뺀 만큼 */
+  padding: 1rem;
+}
+
+.nav-divider {
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgb(255, 255, 255), transparent);
+  opacity: 1;
+}
+
+.sidebar-footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+.nav {
+  flex-grow: 1; /* 남은 공간을 모두 차지해서 footer를 아래로 밀어냄 */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.car-top-view-container {
+  position: relative;
+  width: 300px;
+  margin: 0 auto;
+}
+
+.car-image {
+  width: 59.5%;
+  margin-left: 18%;
+  margin-top: 10px;
+  height: auto;
+  display: block;
+}
+
+.wheel-data {
+  position: absolute;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.wheel-data .param-value {
+  font-weight: bold;
+  font-size: 40px;
+  margin-left: 4px;
+  margin-right: 2px;
+}
+.front-left {
+  top: 10%;
+  left: -10%;
+}
+
+.front-right {
+  top: 10%;
+  right: -8%;
+}
+
+.rear-left {
+  bottom: 20%;
+  left: -10%;
+}
+
+.rear-right {
+  bottom: 20%;
+  right: -8%;}
+  
+  #excel-control button {
+  background: linear-gradient(135deg, #2e3440, #3b4252); /* 모던한 딥그레이 계열 */
+  color: #e0e0e0;
+  border: none;
+  padding: 8px 16px !important; /* 크기 줄임 */
+  font-size: 14px !important;   /* 크기 줄임 */
+  border-radius: 10px !important;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top:5px;
+  margin-right:16px;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.2), -4px -4px 8px rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease-in-out;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+#excel-control button:hover {
+  background: linear-gradient(135deg, #434c5e, #4c566a);
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2), -3px -3px 6px rgba(255, 255, 255, 0.05);
+}
+
+#excel-control button:active {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+
+@media (max-width: 768px) {
+    .layout {
+      flex-direction: column;
+    }
+  
+    .sidebar {
+      position: relative;
+      width: 100%;
+      height: auto;
+      border-radius: 0;
+      padding: 1rem;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  
+    .main-content {
+      margin-left: 0;
+      width: 100%;
+    }
+  }

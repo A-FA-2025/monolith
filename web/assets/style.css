@@ -23,7 +23,7 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f9f9f9;
+    background-color: #000000;
     margin: 0;
     font-family: 'Nanum Gothic', sans-serif;
 }
@@ -87,6 +87,24 @@ body {
 
 .button.purple:hover {
     background-color: #8e44ad;
+    transform: scale(1.05);
+}
+
+.button.green {
+    background-color: #27ae60;
+}
+
+.button.green:hover {
+    background-color: #219150;
+    transform: scale(1.05);
+}
+
+.button.red {
+    background-color: #e74c3c;
+}
+
+.button.red:hover {
+    background-color: #c0392b;
     transform: scale(1.05);
 }
 #speedometer {

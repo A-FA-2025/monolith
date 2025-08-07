@@ -10,6 +10,8 @@ toolchain/
 # Prerequisites
 *.d
 
+*.yml
+
 # Object files
 *.o
 *.ko

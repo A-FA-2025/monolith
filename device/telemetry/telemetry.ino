@@ -13,15 +13,15 @@ const char pwd[]  = NETWORK_PASSWORD;
 /****************************************************************************
  * telemetry server configuration                                           *
  ****************************************************************************/
-const char server[] = SERVER_NAME;
-const char url[] = "/socket.io/?EIO=4&device=1&channel="CHANNEL_NAME"&key="CHANNEL_KEY;
+const char server[] = "afa2025.ddns.net";
+const char url[] = "/socket.io/?EIO=4&device=1&channel=afa&key=1234";
 const int port = 80; // telemetry port of socket.io server
 
 // GPIO and I2C configurations
 #define ESP_COMM 19 // STM32 EXTI GPIO
 #define I2C_SDA  22
 #define I2C_SCL  21
-#define I2C_ADDR (0x0) // generall call address
+#define I2C_ADDR (0x43) // generall call address
 #define I2C_FREQ 400000 // 400kHz fast mode
 
 // global flags

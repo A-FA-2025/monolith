@@ -7,6 +7,10 @@ import winstonDaily from 'winston-daily-rotate-file';
 import { LOG_LEVEL, LOG_SOURCE, LOG_KEY, translate } from '../web/assets/types.js';
 import logfilesRouter from './routes/logfiles.mjs';
 import { fileURLToPath } from 'url';  // ES 모듈에서 __dirname 사용을 위해 필요
+import multer from 'multer';
+import recordRouter from './routes/record.mjs';  
+import ExcelJS from 'exceljs'; // 추가
+
 
 /*****************************************************************************
  * server configurations
@@ -15,17 +19,27 @@ import { fileURLToPath } from 'url';  // ES 모듈에서 __dirname 사용을 위
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.resolve();
+const recordings = new Map(); //추가
 let separateLogTransport = null;
 
 app.use('/api', logfilesRouter);
 app.use(express.static(path.join(__dirname, 'public'))); // 프론트엔드 파일 경로
-
+app.use('/api/record', recordRouter);
+app.use('/recorded', express.static(path.join(__dirname, 'recorded')));
 
 const config = JSON.parse(fs.readFileSync('config.json'));
 
 const server = app.listen(config.port, () => {
   logger.info('SERVER STARTUP', { port: config.port });
 });
+
+// Create /recorded directory if it doesn't exist
+const recordedPath = path.join(__dirname, 'recorded');
+if (!fs.existsSync(recordedPath)) {
+  fs.mkdirSync(recordedPath);
+}
+
+
 /*****************************************************************************
  * logger configurations
  ****************************************************************************/
@@ -96,7 +110,153 @@ io.sockets.on('connection', socket => {
       // 이미 로그 기록 중인 경우, 새 요청은 무시하거나 알림 처리
       //logger.info("이미 별도 로그 기록 중입니다.", { filename: filename });
     }
+    
+  });  
+    
+    //여기부터 추가함
+  // 기록 시작
+  socket.on('start_recording', ({ intervalSec = 0.1 }) => {
+    if (recordings.has(socket.id)) return;
+    const buffer = [];
+    const tid = setInterval(() => {
+      buffer.push({
+        timestamp: new Date().toISOString(),
+        data: JSON.parse(JSON.stringify(ECU))
+      });
+    }, Math.max(0.05, intervalSec) * 1000);
+    recordings.set(socket.id, { tid, buffer });
+    socket.emit('recording_started');
   });
+
+  // 기록 중지
+  socket.on('stop_recording', async () => {
+    const rec = recordings.get(socket.id);
+    if (!rec) return socket.emit('error', '기록 중이 아닙니다.');
+    clearInterval(rec.tid);
+    recordings.delete(socket.id);
+
+    // 워크북·시트 만들기
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet('Telemetry');
+    ws.columns = [
+      //sensor
+      { header: 'Timestamp', key: 'timestamp', width: 25 },
+      { header: 'Speed',     key: 'speed',     width: 10 },
+      { header: 'Accel X',   key: 'accelX',    width: 10 },
+      { header: 'Accel Y',   key: 'accelY',    width: 10 },
+      { header: 'Accel Z',   key: 'accelZ',    width: 10 },
+      { header: 'front_Tire', key: 'front_Tire', width: 10 },
+      { header: 'rear_Tire',  key: 'rear_Tire', width: 10 },
+      { header: 'accel_p',   key: 'accel_p',    width: 10 },
+      { header: 'break_p',   key: 'break_p',    width: 10 },
+      { header: 'steering_speed',   key: 'steering_speed',    width: 10 },
+      { header: 'steering_angle',   key: 'steering_angle',    width: 10 },
+      { header: 'linear_fl',   key: 'linear_fl',    width: 10 },
+      { header: 'linear_fr',   key: 'linear_fr',    width: 10 },
+      { header: 'linear_rl',   key: 'linear_rl',    width: 10 },
+      { header: 'linear_rr',   key: 'linear_rr',    width: 10 },
+      
+      //moter
+      { header: 'INV_TEMP_IGT', key: 'INV_TEMP_IGT', width: 10 },
+      { header: 'INV_TEMP_RTD1',  key: 'INV_TEMP_RTD1', width: 10 },
+      { header: 'INV_TEMP_RTD2',   key: 'INV_TEMP_RTD2',    width: 10 },
+      { header: 'INV_TEMP_gatedriver',   key: 'INV_TEMP_gatedriver',    width: 10 },
+      { header: 'INV_TEMP_controlboard',   key: 'INV_TEMP_controlboard',    width: 10 },       
+      { header: 'INV_TEMP_coolant', key: 'INV_TEMP_coolant', width: 10 },
+      { header: 'INV_TEMP_hotspot',  key: 'INV_TEMP_hotspot', width: 10 },
+      { header: 'INV_TEMP_motor',   key: 'INV_TEMP_motor',    width: 10 },
+      { header: 'INV_moter_speed',   key: 'INV_moter_speed',    width: 10 },
+      { header: 'INV_moter_angle',   key: 'INV_moter_angle',    width: 10 },        
+      { header: 'INV_currnet', key: 'INV_currnet', width: 10 },
+      { header: 'INV_voltage',  key: 'INV_voltage', width: 10 },
+      { header: 'INV_voltage_output',   key: 'INV_voltage_output',    width: 10 },
+      { header: 'INV_torque_feedback',   key: 'INV_torque_feedback',    width: 10 },
+      { header: 'INV_torque_commanded',   key: 'INV_torque_commanded',    width: 10 },
+      
+      //bms
+      { header: 'BMS_charge', key: 'BMS_charge', width: 10 },
+      { header: 'BMS_capacity',  key: 'BMS_capacity', width: 10 },
+      { header: 'BMS_voltage',   key: 'BMS_voltage',    width: 10 },
+      { header: 'BMS_currnet',   key: 'BMS_current',    width: 10 },
+      { header: 'BMS_ccl',   key: 'BMS_ccl',    width: 10 },
+      { header: 'BMS_dcl', key: 'BMS_dcl', width: 10 },
+      { header: 'BMS_TEMP_maxvalue',  key: 'BMS_TEMP_maxvalue', width: 10 },
+      { header: 'BMS_TEMP_maxid',   key: 'BMS_TEMP_maxid',    width: 10 },
+      { header: 'BMS_TEMP_minvalue',   key: 'BMS_TEMP_minvalue',    width: 10 },
+      { header: 'BMS_TEMP_minid',   key: 'BMS_TEMP_minid',    width: 10 },
+      { header: 'BMS_TEMP_internal',  key: 'BMS_TEMP_internal', width: 10 },
+      
+    ];
+
+    // 버퍼 내용으로 채우기
+    for (const row of rec.buffer) {
+      ws.addRow({
+      
+        //sensor
+        timestamp: row.timestamp,
+        speed:     row.data.car.speed,
+        accelX:    row.data.car.accel2.accel2_x,
+        accelY:    row.data.car.accel2.accel2_y,
+        accelZ:    row.data.car.accel2.accel2_z,
+        front_Tire: row.data.car.temp.front_tie,
+        rear_Tire:     row.data.car.temp.rear_tie,
+        accel_p:    row.data.car.accel,
+        break_p:    row.data.car.brake,
+        steering_speed:    row.data.car.steering.speed,
+        steering_angle:     row.data.car.steering.angle,
+        linear_fl:    row.data.car.linear.front_left,
+        linear_fr:     row.data.car.linear.front_right,
+        linear_rl:    row.data.car.linear.rear_left,
+        linear_rr:     row.data.car.linear.rear_right,
+         
+        
+        //moter
+        INV_TEMP_IGT:    row.data.inverter.temperature.igbt.max.temperature,
+        INV_TEMP_RTD1:    row.data.inverter.temperature.rtd.rtd1,
+        INV_TEMP_RTD2:    row.data.inverter.temperature.rtd.rtd2,
+        INV_TEMP_gatedriver: row.data.inverter.temperature.gatedriver,
+        INV_TEMP_controlboard:     row.data.inverter.temperature.controlboard,
+        INV_TEMP_coolant:    row.data.inverter.temperature.coolant,
+        INV_TEMP_hotspot:    row.data.inverter.temperature.hotspot,
+        INV_TEMP_motor:    row.data.inverter.temperature.motor,
+        INV_moter_speed:    row.data.inverter.motor.speed,
+        INV_moter_angle:    row.data.inverter.motor.angle,
+        INV_currnet:    row.data.inverter.current.dc_bus,
+        INV_voltage:     row.data.inverter.voltage.dc_bus,
+        INV_voltage_output:    row.data.inverter.voltage.output,
+        INV_torque_feedback:    row.data.inverter.torque.feedback,
+        INV_torque_commanded:    row.data.inverter.torque.commanded,
+        
+        //bms
+        BMS_charge: row.data.bms.charge,
+        BMS_capacity:     row.data.bms.capacity,
+        BMS_voltage:    row.data.bms.voltage,
+        BMS_current:    row.data.bms.current,
+        BMS_ccl:    row.data.bms.ccl,
+        BMS_dcl: row.data.bms.dcl,
+        BMS_TEMP_maxvalue:     row.data.bms.temperature.max.value,
+        BMS_TEMP_maxid:    row.data.bms.temperature.max.id,
+        BMS_TEMP_minvalue:    row.data.bms.temperature.min.value,
+        BMS_TEMP_minid:    row.data.bms.temperature.min.id,
+        BMS_TEMP_internal:    row.data.bms.temperature.internal,
+        
+      });
+    }
+
+    // 파일 저장
+    const filename = `rec-${socket.id}-${Date.now()}.xlsx`;
+    const filepath = path.join(__dirname, 'recorded', filename);
+    await wb.xlsx.writeFile(filepath);
+
+    // 클라이언트에 다운로드 URL 전송
+    socket.emit('recording_stopped', { file: `/recorded/${filename}` });
+  });
+    
+    //여기까지 했음
+    
+    
+    
+  
 
   // 로그 기록 정지 이벤트 처리
   socket.on("stop_log_recording", () => {
@@ -363,12 +523,43 @@ function process_telemetry(data, socket) {
               break;
           case "CAN_INV_HIGH_SPD_MSG":
               break;
+              
+          case "CAN_FRONT_LINEAR_L": {
+            ECU.car.linear.front_left = data.parsed.lengthMM;
+          break;}
+          case "CAN_FRONT_LINEAR_R": {
+            ECU.car.linear.front_right = data.parsed.lengthMM;
+         break; }
+          case "CAN_REAR_LINEAR_L": {
+            ECU.car.linear.rear_left = data.parsed.lengthMM;
+          break;}
+          case "CAN_REAR_LINEAR_R": {
+            ECU.car.linear.rear_right = data.parsed.lengthMM;
+          break;}
+          
+          case "CAN_FRONTTIE_TEMP": {
+            ECU.car.temp.front_tie = data.parsed.temperature;
+          break;}
+         
+          case "CAN_REARTIE_TEMP": {
+            ECU.car.temp.rear_tie = data.parsed.temperature;
+          break;}
+          
+          case "CAN_ACCEL": {
+            ECU.car.accel2.accel2_x = data.parsed.accel2_x;
+            ECU.car.accel2.accel2_y = data.parsed.accel2_y;
+            ECU.car.accel2.accel2_z = data.parsed.accel2_z;
+          break;}
+          
+          
+          
           case "CAN_STEERING_WHEEL_ANGLE":{
             ECU.car.steering.angle = data.parsed.angle;
-            ECU.car.steering.speed = data.parsed.speed;
-          }
-          default:
-            break;
+            ECU.car.steering.speed = data.parsed.speed;       
+        }
+  
+        default:
+        break;
         }
         break;
       }
@@ -481,7 +672,28 @@ let ECU = {          // initial system status
     steering: {
       speed: 0,
       angle: 0,
-    }
+    },
+     linear: {
+      front_left: 0,
+      front_right: 0,
+      rear_left: 0,
+      rear_right: 0,
+    
+    },
+    
+     temp: {
+      front_tie: 0,
+      rear_tie: 0,
+     
+     },
+     
+     accel2: {
+      accel2_x: 0,
+      accel2_y: 0,
+      accel2_z: 0,
+     
+     },
+    
   },
   inverter: {
     temperature: {
