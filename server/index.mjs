@@ -896,4 +896,3 @@ const fault = { // motor controller fault properties
     63: "Reserved",
   }
 }
-

@@ -47,17 +47,17 @@
             <i class="fa-solid fa-fw fa-tv"></i>&ensp;LIVE CAN
           </span>
        
-          <a href="https://github.com/Ju-Daeng-E/AFA_E-Formula_MONOLITH" target="_blank">
+          <a href="https://github.com/A-FA-2025/monolith" target="_blank">
             <span ><i class="fa-brands fa-fw fa-github"></i>&ensp;CODE</span>
           </a>
        
-          <span id="reset" >
+          <!--<span id="reset" >
             <i class="fa-solid fa-fw fa-triangle-exclamation"></i>&ensp;초기화
           </span>
        
           <span id="toggle-all-graphs" >
             <i class="fa-solid fa-fw fa-chart-line"></i>&ensp;그래프 전체 on/off
-          </span>
+          </span>-->
           <a href="https://afa2025.ddns.net/stream.html" target="_blank">
             <span >
               <i class="fa-solid fa-fw fa-car-side"></i>&ensp;전지적 자동차 시점
@@ -78,8 +78,8 @@
           <button id="start-log-recording">log start</button>
         </div>
         <div id="excel-control" style="display:inline-block; margin-left:10px; vertical-align:middle;">
-    <button id="start-excel-recording">엑셀 기록 시작</button>
-    <button id="stop-excel-recording" disabled>엑셀 기록 중지</button>
+    <button id="start-excel-recording">데이터 기록 시작</button>
+    <button id="stop-excel-recording" disabled>데이터 기록 중지</button>
     <div id="excel-download" style="margin-top:4px;"></div>
   </div>
   
@@ -225,10 +225,10 @@
               <th class="param-label">
                 <h2>가속도</h2>
                 <div class="toggle_graph">
-                  <input class="tgl tooltips tgl-skewed" id="tooltip-accel" type="checkbox"/>
-                  <label class="tgl-btn" data-tg-off="도움말" data-tg-on="도움말" for="tooltip-accel"></label>
-                  <input class="tgl toggle-graph tgl-skewed" id="toggle-graph-accel" type="checkbox"/>
-                  <label class="tgl-btn" data-tg-off="그래프" data-tg-on="그래프" for="toggle-graph-accel"></label>
+                  <input class="tgl tooltips tgl-skewed" id="tooltip-accel2" type="checkbox"/>
+                  <label class="tgl-btn" data-tg-off="도움말" data-tg-on="도움말" for="tooltip-accel2"></label>
+                  <input class="tgl toggle-graph tgl-skewed" id="toggle-graph-accel2" type="checkbox"/>
+                  <label class="tgl-btn" data-tg-off="그래프" data-tg-on="그래프" for="toggle-graph-accel2"></label>
                 </div>
               </th>
               <th class="param-data">
@@ -239,9 +239,9 @@
             </tr>
             <tr>
               <td colspan="2" class="param-graph">
-                <canvas id="graph-accel-x" class="graph" width="100%" height="60vh"></canvas>
-                <canvas id="graph-accel-y" class="graph" width="100%" height="60vh"></canvas>
-                <canvas id="graph-accel-z" class="graph" width="100%" height="60vh"></canvas>
+                <canvas id="graph-accel2-x" class="graph" width="100%" height="60vh"></canvas>
+                <canvas id="graph-accel2-y" class="graph" width="100%" height="60vh"></canvas>
+                <canvas id="graph-accel2-z" class="graph" width="100%" height="60vh"></canvas>
               </td>
             </tr>
             <tr>
@@ -392,8 +392,8 @@
                 </div>
               </th>
               <th class="param-data">
-                <h2><span class="param-unit">front&ensp;</span><span id="fronttie-temp" class="param-value">0</span><span class="param-unit">&ensp;℃</span></h2>
-                <h2><span class="param-unit">rear&ensp;&ensp;</span><span id="reartie-temp" class="param-value">0</span><span class="param-unit">&ensp;℃</span></h2>
+                <h2><span class="param-unit">left&ensp;</span><span id="fronttie-temp" class="param-value">0</span><span class="param-unit">&ensp;℃</span></h2>
+                <h2><span class="param-unit">right&ensp;&ensp;</span><span id="reartie-temp" class="param-value">0</span><span class="param-unit">&ensp;℃</span></h2>
               </th>
             </tr>
             <tr>
@@ -1330,8 +1330,3 @@
       </script>
   </body>
 </html>
-
-
-
-
-

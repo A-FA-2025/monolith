@@ -440,24 +440,14 @@ function parse(log) {
         } 
     
         case "CAN_FRONTTIE_TEMP": {
-          const rawADCc = raw[0] + raw[1] * Math.pow(2, 8);
-          const voltagee = (rawADCc / 4095.0) * 3.3;
-          const calibratedVoltagee = voltagee * 1.12 + 0.05;
-          const temperatureC = 101.65 * calibratedVoltagee - 68.25 - 8;
-          parsed = {
-            temperature: temperatureC
-          };
+          const tempC = (raw[0] << 24) >> 24;
+          parsed = {temperature: tempC};
           break;
         } 
         
         case "CAN_REARTIE_TEMP": {
-          const rawADCc = raw[0] + raw[1] * Math.pow(2, 8);
-          const voltagee = (rawADCc / 4095.0) * 3.3;
-          const calibratedVoltagee = voltagee * 1.12 + 0.05;
-          const temperatureC = 101.65 * calibratedVoltagee - 68.25 - 8;
-          parsed = {
-            temperature: temperatureC
-          };
+          const tempC = (raw[0] << 24) >> 24;
+          parsed = {temperature: tempC};
           break;
         }
         
@@ -465,7 +455,7 @@ function parse(log) {
         parsed = {
             accel2_x: signed(raw[0] + raw[1] * Math.pow(2, 8), 16) / 128, 
             accel2_y: signed(raw[2] + raw[3] * Math.pow(2, 8), 16) / 128, 
-            accel2_z: signed(raw[2] + raw[3] * Math.pow(2, 8), 16) / 128 
+            accel2_z: signed(raw[4] + raw[5] * Math.pow(2, 8), 16) / 128 
           };
           break;
         }
