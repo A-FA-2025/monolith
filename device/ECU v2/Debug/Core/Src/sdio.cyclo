@@ -1,0 +1,6 @@
+../Core/Src/sdio.c:32:5:SD_SETUP	3
+../Core/Src/sdio.c:70:5:SD_WRITE	5
+../Core/Src/sdio.c:97:5:SD_SYNC	3
+../Core/Src/sdio.c:122:6:MX_SDIO_SD_Init	1
+../Core/Src/sdio.c:145:6:HAL_SD_MspInit	4
+../Core/Src/sdio.c:237:6:HAL_SD_MspDeInit	2

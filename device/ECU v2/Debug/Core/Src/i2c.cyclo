@@ -1,0 +1,14 @@
+../Core/Src/i2c.c:63:6:i2c_slave_clear	1
+../Core/Src/i2c.c:71:5:i2c_slave_init	1
+../Core/Src/i2c.c:76:13:ResetI2C	1
+../Core/Src/i2c.c:82:6:i2c_slave_check_timeout	3
+../Core/Src/i2c.c:107:6:HAL_I2C_AddrCallback	8
+../Core/Src/i2c.c:166:6:HAL_I2C_SlaveRxCpltCallback	5
+../Core/Src/i2c.c:188:6:HAL_I2C_ListenCpltCallback	1
+../Core/Src/i2c.c:192:6:HAL_I2C_SlaveTxCpltCallback	1
+../Core/Src/i2c.c:197:6:HAL_I2C_ErrorCallback	1
+../Core/Src/i2c.c:225:5:TELEMETRY_SETUP	1
+../Core/Src/i2c.c:256:6:TELEMETRY_TRANSMIT_LOG	2
+../Core/Src/i2c.c:324:6:MX_I2C1_Init	2
+../Core/Src/i2c.c:383:6:HAL_I2C_MspInit	2
+../Core/Src/i2c.c:453:6:HAL_I2C_MspDeInit	2

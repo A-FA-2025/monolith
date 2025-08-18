@@ -1,0 +1,3 @@
+../Core/Src/registers.c:16:11:reg_get_idx	3
+../Core/Src/registers.c:25:5:reg_get_len	6
+../Core/Src/registers.c:44:6:reg_factory	6
