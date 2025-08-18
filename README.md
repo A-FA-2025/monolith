@@ -1,12 +1,13 @@
 # A-FA Telemetry System
 
-A-FA Telemetry System은 Node.js (Express + Socket.IO), Nginx를 이용해 원격 계측(텔레메트리) 데이터 수집, 그리고 로그 기록 및 리뷰를 제공하는 통합 시스템입니다.
-
-사이트 바로가기 -> https://afa2025.ddns.net
+A-FA Telemetry System은 Node.js (Express + Socket.IO) 와 Nginx 기반으로 구축된 원격 계측(텔레메트리) 통합 플랫폼입니다.
+실시간 데이터 수집, 로그 기록 및 리뷰 기능을 제공하여 연구/테스트 환경에서 효율적인 계측 및 분석을 지원합니다.
+🔗 사이트 바로가기 -> https://afa2025.ddns.net
 
 ---
 
 ## 주요 기능
+<img width="1709" height="987" alt="스크린샷 2025-08-18 오후 2 27 38" src="https://github.com/user-attachments/assets/ebe197d2-5aaa-4ad1-8ed8-fc3bf49c5b95" />
 
 - **원격 계측 (Telemetry)**
   - ESP32, ECU 등에서 전송한 데이터를 Node.js 서버가 실시간으로 수신합니다.
@@ -17,7 +18,6 @@ A-FA Telemetry System은 Node.js (Express + Socket.IO), Nginx를 이용해 원�
   - “로그 기록 정지” 버튼으로 로그 기록을 중지합니다.
   - 리뷰 페이지에서는 업로드된 로그 파일 목록을 불러와, 각 줄의 JSON 데이터를 파싱하여 그래프, 표, 지도 등으로 시각화합니다.
   - JSON 및 CSV 파일 다운로드 기능을 제공합니다.
-
 - **Nginx Reverse Proxy**
   - Nginx는 80(HTTP) 및 443(HTTPS) 포트를 통해 SSL 처리를 하고, 내부적으로 Node.js 서버(예: 7777 포트)로 요청을 프록시합니다.
   - API, Socket.IO 등 필요한 경로를 프록시하여 통합 환경을 구성합니다.
