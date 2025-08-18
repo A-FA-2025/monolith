@@ -27,7 +27,7 @@ const LOG_KEY = {
     0xAE: "CAN_INV_FIRMWARE_VER",
     0xAF: "CAN_INV_DIAGNOSTIC",
 
-    0xB0: "CAN_STEERING_WHEEL_ANGLE",
+    0xB0: "CAN_INV_HIGH_SPD_MSG",
 
     0x81: "CAN_BMS_CORE",
     0x82: "CAN_BMS_TEMP",
@@ -46,7 +46,7 @@ const LOG_KEY = {
     0x89: "CAN_ACCEL",
     
     
-    // 0x2B0: "CAN_STEERING_WHEEL_ANGLE"
+    0x2B0: "CAN_STEERING_WHEEL_ANGLE",
   },
   "ADC": [ "ADC_INIT", "ADC_CPU", "ADC_DIST" ,"ADC_A3"],
   "TIM": [ "TIMER_IC"],
@@ -226,13 +226,14 @@ function parse(log) {
           break;
         }
 
-        case "CAN_INV_MOTOR_POS": {
+        case "CAN_INV_MOTOR_POS":{
           parsed = {
             motor_angle: signed(value & 0xffff, 16) * 0.1,
             motor_speed: signed((value / Math.pow(2, 16)) & 0xffff, 16),
             electrical_output_freq: signed((value / Math.pow(2, 32)) & 0xffff, 16) * 0.1,
             delta_resolver_filtered: signed((value / Math.pow(2, 48)) & 0xffff, 16) * 0.1,
           };
+          
           break;
         }
 
@@ -401,7 +402,7 @@ function parse(log) {
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true),
+            lengthMM: view.getFloat32(0, true) - 46,
           };
           break;
         } 
@@ -412,7 +413,7 @@ function parse(log) {
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true),
+            lengthMM: view.getFloat32(0, true) - 54,
           };
           break;
         } 
@@ -423,7 +424,7 @@ function parse(log) {
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true),
+            lengthMM: view.getFloat32(0, true) - 97,
           };
           break;
         } 
@@ -434,7 +435,7 @@ function parse(log) {
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true),
+            lengthMM: view.getFloat32(0, true) -57,
           };
           break;
         } 
