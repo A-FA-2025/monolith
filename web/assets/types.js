@@ -27,7 +27,7 @@ const LOG_KEY = {
     0xAE: "CAN_INV_FIRMWARE_VER",
     0xAF: "CAN_INV_DIAGNOSTIC",
 
-    0xB0: "CAN_INV_HIGH_SPD_MSG",
+    0xB0: "CAN_STEERING_WHEEL_ANGLE",
 
     0x81: "CAN_BMS_CORE",
     0x82: "CAN_BMS_TEMP",
@@ -46,7 +46,7 @@ const LOG_KEY = {
     0x89: "CAN_ACCEL",
     
     
-    0x2B0: "CAN_STEERING_WHEEL_ANGLE",
+   // 0x2B: "CAN_STEERING_WHEEL_ANGLE",
   },
   "ADC": [ "ADC_INIT", "ADC_CPU", "ADC_DIST" ,"ADC_A3"],
   "TIM": [ "TIMER_IC"],
@@ -346,10 +346,10 @@ function parse(log) {
           break;
         }
 
-        case "CAN_INV_HIGH_SPD_MSG": {
-          parsed = null;
-          break;
-        }
+       // case "CAN_INV_HIGH_SPD_MSG": {
+         // parsed = null;
+         // break;
+      //  }
 
         case "CAN_BMS_CORE": {
           const failsafe = raw[7] + raw[6] * Math.pow(2, 8);
@@ -391,29 +391,29 @@ function parse(log) {
 
         case "CAN_STEERING_WHEEL_ANGLE": {
           parsed = {
-            angle: signed(raw[0] + raw[1] * Math.pow(2, 8), 16) * 0.1, // ±780° 범위
-            speed: signed(raw[2] + raw[3] * Math.pow(2, 8), 16) * 4 // 0 to 1,016°/s 범위
+            angle: signed(raw[0] + raw[1] * Math.pow(2, 8), 16) * 0.1 + 2.7, // ±780° 범위
+            speed: signed(raw[2] + raw[3] * Math.pow(2, 8), 16) * 4 -7168 // 0 to 1,016°/s 범위
           };
           break;
     }
            case "CAN_FRONT_LINEAR_L": {
-          const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24);
+          const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24) ;
           const buffer = new ArrayBuffer(4);
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true) - 46,
+            lengthMM: view.getFloat32(0, true) - 57,
           };
           break;
         } 
        
         case "CAN_FRONT_LINEAR_R": {
-         const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24);
+         const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24) ;
           const buffer = new ArrayBuffer(4);
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true) - 54,
+            lengthMM: view.getFloat32(0, true) - 59,
           };
           break;
         } 
@@ -424,18 +424,18 @@ function parse(log) {
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true) - 97,
+            lengthMM: view.getFloat32(0, true) -50 ,
           };
           break;
         } 
        
         case "CAN_REAR_LINEAR_R": {
-          const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24);
+          const bits = raw[0] + (raw[1] << 8) + (raw[2] << 16) + (raw[3] << 24) ;
           const buffer = new ArrayBuffer(4);
           const view = new DataView(buffer);
           view.setUint32(0, bits, true);
           parsed = {
-            lengthMM: view.getFloat32(0, true) -57,
+            lengthMM: view.getFloat32(0, true)  - 50,
           };
           break;
         } 

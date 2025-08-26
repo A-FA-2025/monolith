@@ -21,7 +21,7 @@ if (typeof io === 'undefined') {
   socket.on('device_connected', data => {
   
     Swal.fire({
-      title: 'ESP32 연결 성공',
+      title: '서버 연결 성공',
       text: data.message,
       icon: 'success',
       confirmButtonText: '확인'
@@ -32,7 +32,7 @@ if (typeof io === 'undefined') {
     $("#telemetry i").css("color", "red");
     data.telemetry = 0;
     Swal.fire({
-      title: 'ESP32 연결 끊김',
+      title: '서버 연결 끊김',
       text: data.message,
       icon: 'error',
       confirmButtonText: '확인'
@@ -89,7 +89,7 @@ if (typeof io === 'undefined') {
   
 // 1) 녹화 시작 버튼
 $('#start-excel-recording').on('click', () => {
-  socket.emit('start_recording', { intervalSec: 0.1 });   // 예: 1초 간격
+  socket.emit('start_recording', { intervalSec: 0.2 });   // 예: 1초 간격
   $('#start-excel-recording').prop('disabled', true);
   $('#stop-excel-recording').prop('disabled', false);
   $('#excel-download').empty();
@@ -103,16 +103,16 @@ $('#stop-excel-recording').on('click', () => {
 
 // 3) 서버로부터 “녹화 시작됨” 확인
 socket.on('recording_started', () => {
-  Swal.fire({ icon: 'success', title: '엑셀 기록 시작', timer: 1000 });
+  Swal.fire({ icon: 'success', title: '데이터 기록 시작', timer: 1000 });
 });
 
 // 4) 서버로부터 “녹화 중지·파일 생성됨” 알림
 socket.on('recording_stopped', ({ file }) => {
   // file 은 e.g. "/recorded/recording-<id>-<timestamp>.xlsx"
-  const link = $(`<a href="${file}" download>📥 엑셀 파일 다운로드</a>`);
+  const link = $(`<a href="${file}" download>📥 데이터 파일 다운로드</a>`);
   $('#excel-download').empty().append(link);
   $('#start-excel-recording').prop('disabled', false);
-  Swal.fire({ icon: 'success', title: '엑셀 파일 생성 완료' });
+  Swal.fire({ icon: 'success', title: '데이터 파일 생성 완료' });
 });
 
 // 5) 에러 처리

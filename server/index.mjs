@@ -167,12 +167,17 @@ io.sockets.on('connection', socket => {
       { header: 'INV_TEMP_motor',   key: 'INV_TEMP_motor',    width: 10 },
       { header: 'INV_moter_speed',   key: 'INV_moter_speed',    width: 10 },
       { header: 'INV_moter_angle',   key: 'INV_moter_angle',    width: 10 },        
-      { header: 'INV_currnet', key: 'INV_currnet', width: 10 },
+      { header: 'INV_dc_currnet', key: 'INV_dc_currnet', width: 10 },
+      { header: 'INV_A_currnet', key: 'INV_A_currnet', width: 10 },
+      { header: 'INV_B_currnet', key: 'INV_B_currnet', width: 10 },
+      { header: 'INV_C_currnet', key: 'INV_C_currnet', width: 10 },
       { header: 'INV_voltage',  key: 'INV_voltage', width: 10 },
       { header: 'INV_voltage_output',   key: 'INV_voltage_output',    width: 10 },
       { header: 'INV_torque_feedback',   key: 'INV_torque_feedback',    width: 10 },
       { header: 'INV_torque_commanded',   key: 'INV_torque_commanded',    width: 10 },
-      
+      { header: 'INV_id_feedback',   key: 'INV_id_feedback',    width: 10 },
+      { header: 'INV_iq_feedback',   key: 'INV_iq_feedback',    width: 10 },      
+     
       //bms
       { header: 'BMS_charge', key: 'BMS_charge', width: 10 },
       { header: 'BMS_capacity',  key: 'BMS_capacity', width: 10 },
@@ -221,12 +226,19 @@ io.sockets.on('connection', socket => {
         INV_TEMP_motor:    row.data.inverter.temperature.motor,
         INV_moter_speed:    row.data.inverter.motor.speed,
         INV_moter_angle:    row.data.inverter.motor.angle,
-        INV_currnet:    row.data.inverter.current.dc_bus,
+        INV_dc_currnet:    row.data.inverter.current.dc_bus,
+        INV_A_currnet:    row.data.inverter.current.A,
+        INV_B_currnet:    row.data.inverter.current.B,
+        INV_C_currnet:    row.data.inverter.current.C, 
         INV_voltage:     row.data.inverter.voltage.dc_bus,
         INV_voltage_output:    row.data.inverter.voltage.output,
         INV_torque_feedback:    row.data.inverter.torque.feedback,
         INV_torque_commanded:    row.data.inverter.torque.commanded,
-        
+        INV_id_feedback:    row.data.inverter.feedback.id,
+        INV_iq_feedback:    row.data.inverter.feedback.iq,
+
+
+
         //bms
         BMS_charge: row.data.bms.charge,
         BMS_capacity:     row.data.bms.capacity,
@@ -447,11 +459,16 @@ function process_telemetry(data, socket) {
           case "CAN_INV_MOTOR_POS": {
             ECU.inverter.motor.angle = data.parsed.motor_angle;
             ECU.inverter.motor.speed = data.parsed.motor_speed;
-            ECU.car.speed = Math.PI * 0.4572 * 60 * data.parsed.motor_speed / (1000 * 4.941176);
+            ECU.car.speed = Math.PI * 0.4572 * 60 * data.parsed.motor_speed / (1000 * 4.9183);
             break;
           }
           case "CAN_INV_CURRENT": {
             ECU.inverter.current.dc_bus = data.parsed.dc_bus_current;
+            ECU.inverter.current.A = data.parsed.phaseA;
+            ECU.inverter.current.B = data.parsed.phaseB;
+            ECU.inverter.current.C = data.parsed.phaseC;
+
+            
             break;
           }
           case "CAN_INV_VOLTAGE": {
@@ -495,6 +512,7 @@ function process_telemetry(data, socket) {
             ECU.inverter.torque.commanded = data.parsed.commanded_torque;
             break;
           }
+
           case "CAN_BMS_CORE": {
             ECU.bms.charge = data.parsed.soc;
             ECU.bms.capacity = data.parsed.capacity;
@@ -511,7 +529,10 @@ function process_telemetry(data, socket) {
           }
           case "CAN_INV_DIGITAL_IN":
               break;
-          case "CAN_INV_FLUX":
+          case "CAN_INV_FLUX": {
+            ECU.inverter.feedback.id = data.parsed.Id_feedback;
+            ECU.inverter.feedback.iq = data.parsed.Iq_feedback;
+          }
               break;
           case "CAN_INV_REF":
               break;
@@ -719,6 +740,9 @@ let ECU = {          // initial system status
     },
     current: {
       dc_bus: 0,
+      A: 0,
+      B: 0,
+      C: 0,
     },
     voltage: {
       dc_bus: 0,
@@ -753,6 +777,11 @@ let ECU = {          // initial system status
       feedback: 0,
       commanded: 0,
     },
+    feedback: {
+      id: 0,
+      iq: 0,
+    },
+
   },
   bms: {
     charge: 0,
