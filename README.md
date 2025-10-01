@@ -1,66 +1,92 @@
-# 🚗 A-FA Telemetry System
+# A-FA Telemetry System
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/eb8b837c-2d97-472c-8855-c3eee1eed1a7" width="500"/>
+</p>
 
-![banner](https://github.com/user-attachments/assets/eb8b837c-2d97-472c-8855-c3eee1eed1a7)
+A-FA Telemetry System은 Node.js (Express + Socket.IO) 와 Nginx 기반으로 구축된 원격 계측(텔레메트리) 통합 플랫폼입니다.  
+실시간 데이터 수집, 로그 기록 및 리뷰 기능을 제공하여 연구/테스트 환경에서 효율적인 계측 및 분석을 지원합니다.  
 
-**A-FA Telemetry System**은 Node.js (Express + Socket.IO) 와 Nginx 기반으로 구축된  
-**원격 계측(텔레메트리) 통합 플랫폼**입니다.  
-실시간 데이터 수집, 로그 기록 및 리뷰 기능을 제공하여  
-연구/테스트 환경에서 효율적인 계측 및 분석을 지원합니다.  
-
-🔗 **사이트 바로가기:** [https://afa2025.ddns.net](https://afa2025.ddns.net)
+🔗 사이트 바로가기 -> [https://afa2025.ddns.net](https://afa2025.ddns.net)
 
 ---
 
-## ✨ 주요 기능
+## 주요 기능
 
 ### 📡 원격 계측 (Telemetry)
-<img src="https://github.com/user-attachments/assets/fedf70b1-da7d-4d0c-87ea-503705184a91" width="600"/>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/fedf70b1-da7d-4d0c-87ea-503705184a91" width="400"/>
+  <img src="https://github.com/user-attachments/assets/ebe197d2-5aaa-4ad1-8ed8-fc3bf49c5b95" width="500"/>
+</p>
 
-- ESP32, ECU 등에서 전송한 데이터를 서버가 실시간으로 수신
-- Socket.IO를 통해 클라이언트에 중계 및 로그 기록 지원
+- ESP32, ECU 등에서 전송한 데이터를 Node.js 서버가 실시간으로 수신합니다.
+- Socket.IO를 통해 클라이언트에 데이터를 중계하며, 로그 파일로 기록할 수 있습니다.
 
 ---
 
 ### 📝 로그 기록 및 리뷰
-<img src="https://github.com/user-attachments/assets/ef794776-00cf-44d2-84ef-ec7ffb3f02e1" width="480"/>  
-<img src="https://github.com/user-attachments/assets/ebe197d2-5aaa-4ad1-8ed8-fc3bf49c5b95" width="600"/>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ef794776-00cf-44d2-84ef-ec7ffb3f02e1" width="450"/>
+  <img src="https://github.com/user-attachments/assets/433e5928-fea8-4a10-b1dc-30a517cec3c5" width="450"/>
+</p>
 
-- `separated_logs/` 폴더에 지정된 파일명으로 로그 저장
-- JSON 로그 파싱 → 그래프/표/지도 시각화
-- CSV/JSON 다운로드 지원
+- “로그 기록 시작” 버튼을 통해 지정한 파일명으로 `separated_logs/` 폴더에 로그를 저장합니다.
+- “로그 기록 정지” 버튼으로 로그 기록을 중지합니다.
+- 리뷰 페이지에서는 업로드된 로그 파일 목록을 불러와, 각 줄의 JSON 데이터를 파싱하여 그래프, 표, 지도 등으로 시각화합니다.
+- CSV 파일 다운로드 기능을 제공합니다.
 
 ---
 
 ### 🛠️ 설계 검증 시스템 시뮬레이터
-<img src="https://github.com/user-attachments/assets/2dc6206d-8137-4c1f-8328-a44714b14368" width="500"/>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/2dc6206d-8137-4c1f-8328-a44714b14368" width="500"/>
+</p>
 
-- 가상의 CAN 데이터를 전송하는 시뮬레이터(C++/Arduino IDE)
-- 실제 차량 장착 전 **STM32F4 수신/처리 로직 테스트 가능**
-
----
-
-### 🎥 실시간 카메라 스트리밍
-<img src="https://github.com/user-attachments/assets/3fd5ff3f-a55c-4b51-bbf7-88dfbeedd6dd" width="450"/>
-
-- 매 프레임을 JPEG(quality=30)으로 인코딩 후 WebSocket 서버 전송
-- 브라우저 녹화 제어 → 로컬 AVI 저장 후 서버 업로드
-- TLS 암호화 및 동시 퍼블리셔 제한으로 보안 강화
-- 서버 스토리지 보관 → 브라우저 문제 발생 시에도 데이터 유지
+- 시스템 설계에 대한 디버깅시간을 획기적으로 줄이고자 가상의 CAN 데이터를 전송해 주는 시뮬레이터 시스템을 설계하였습니다.
+- 프로그래밍 언어는 C++를 사용하였으며, 아두이노 IDE를 사용하여 코드를 구현하였습니다.
+- 이 시스템을 통해, 실제 차량에 장착되는 센서 데이터를 임의의 코드 기반 시뮬레이터를 통해 생성하고 STM32F4가 수신하도록 하여, 수신 및 처리 로직을 테스트할 수 있습니다.
 
 ---
 
-### 📟 차량용 인터페이스 (Raspberry Pi + Nextion Display)
-<img src="https://github.com/user-attachments/assets/faec382b-9447-4000-aa32-ff70ccf31bc5" width="450"/>
+### 🎥 실시간 카메라 기능
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3fd5ff3f-a55c-4b51-bbf7-88dfbeedd6dd" width="400"/>
+</p>
 
-- **NX8048P050_011R 디스플레이** (저항식 터치, 장갑 착용 환경 고려)
-- STM32F4 → Raspberry Pi5 → 서버 & 디스플레이 **이중 버퍼 전송**
-- 실시간 CAN 데이터 기반 UI 구현
+- 매 프레임을 JPEG(quality=30)로 인코딩 후 WebSocket 서버로 전송합니다.
+- 녹화 제어의 경우, 브라우저에서 보낸 녹화 시작/정지 명령을 받아 로컬 AVI로 저장 후, HTTP POST로 https://afa2025.ddns.net/api/record/upload_video 에 업로드합니다.
+- WebSocket 서버는 TLS 암호화 처리와 인증 시스템을 통해 stream 서비스 보안을 강화했으며, 동시 퍼블리셔 제한으로 보안을 한층 더 깊게 설계하였습니다.
+- 파일 저장 후 처리의 경우, 서버 내부 스토리지에 보관하도록 설계하여 브라우저에 문제가 생기더라도 서버를 통해 주행 영상을 확보할 수 있습니다.
 
 ---
 
-## 🚀 사용 방법
+### 📟 차량용 인터페이스 추가
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/faec382b-9447-4000-aa32-ff70ccf31bc5" width="400"/>
+</p>
+
+- 디스플레이의 경우 **NX8048P050_011R 모델**을 사용하였으며, 드라이버가 장갑을 착용하고 있기 때문에 저항식 터치패널이 탑재된 모델을 선정했습니다.
+- 디스플레이 사용하는 데이터 소스는 STM32F4를 통해 전송된 CAN 데이터를 Raspberry Pi 5 내부에서 공유하도록 설계하였습니다.
+- 서버와 디스플레이에 동일한 데이터를 동시에 전송해야 하므로, STM32F4가 데이터를 받는 즉시 서버용 버퍼와 디스플레이용 버퍼로 나누어 복사된 두 개의 데이터를 독립적으로 활용할 수 있도록 설계하였습니다.
+
+---
+
+## 사용 방법
 
 ### 1. 원격 계측 디바이스 연결
-디바이스(ESP32, ECU 등)는 아래 URL을 통해 **소켓 연결** 수행:
-```bash
+- **디바이스** (예: ESP32, ECU 등)는 아래 URL을 통해 소켓 연결을 수행합니다:
 wss://afa2025.ddns.net/socket.io/?channel=afa&key=1234&device=true
+
+- 디바이스는 `tlog` 이벤트로 데이터를 전송하며, 서버는 이를 실시간으로 클라이언트에 중계하고 로그 파일로 기록합니다.
+
+---
+
+### 2. 실시간 모니터링 페이지
+- 브라우저에서 **`https://afa2025.ddns.net/live.html`** 에 접속하여 실시간 텔레메트리 데이터를 확인합니다.
+- 페이지 내 “로그 기록 시작” 및 “로그 기록 정지” 버튼을 통해 별도의 로그 파일 기록을 제어할 수 있습니다.
+
+---
+
+### 3. 로그 리뷰 페이지
+- **`https://afa2025.ddns.net/review/`** 페이지에 접속하면, 서버에서 `/api/logfiles` 엔드포인트를 통해 저장된 로그 파일 목록이 불러와집니다.
+- 사용자가 로그 파일을 선택한 후 “불러오기” 버튼을 누르면, 파일의 각 줄(JSON 형식)을 파싱하여 그래프, 표, 지도 등으로 데이터를 시각화합니다.
+- 또한, JSON 및 CSV 형식으로 로그 데이터를 다운로드할 수 있는 기능이 제공됩니다.
