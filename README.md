@@ -8,8 +8,8 @@ A-FA Telemetry System은 Node.js (Express + Socket.IO) 와 Nginx 기반으로 �
 ---
 
 ## 주요 기능
+<img width="808" height="492" alt="스크린샷 2025-10-01 오후 3 47 42" src="https://github.com/user-attachments/assets/fedf70b1-da7d-4d0c-87ea-503705184a91" />
 <img width="1709" height="987" alt="스크린샷 2025-08-18 오후 2 27 38" src="https://github.com/user-attachments/assets/ebe197d2-5aaa-4ad1-8ed8-fc3bf49c5b95" />
-<img width="808" height="492" alt="스크린샷 2025-10-01 오후 3 47 42" src="https://github.com/user-attachments/assets/fedf70b1-da7d-4d0c-87ea-503705184a91" />
 <img width="803" height="439" alt="스크린샷 2025-10-01 오후 3 51 48" src="https://github.com/user-attachments/assets/433e5928-fea8-4a10-b1dc-30a517cec3c5" />
 
 - **원격 계측 (Telemetry)**
