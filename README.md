@@ -1,4 +1,5 @@
 # A-FA Telemetry System
+![IMG_9295](https://github.com/user-attachments/assets/eb8b837c-2d97-472c-8855-c3eee1eed1a7)
 
 A-FA Telemetry System은 Node.js (Express + Socket.IO) 와 Nginx 기반으로 구축된 원격 계측(텔레메트리) 통합 플랫폼입니다.
 실시간 데이터 수집, 로그 기록 및 리뷰 기능을 제공하여 연구/테스트 환경에서 효율적인 계측 및 분석을 지원합니다.
